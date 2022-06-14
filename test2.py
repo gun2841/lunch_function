@@ -8,13 +8,17 @@ import urllib.request
 import urllib.parse
 import re
 from bs4 import BeautifulSoup
-
+import platform
 headers={"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/100.0.4896.151 Whale/3.14.134.62 Safari/537.36"}
 
 url="https://map.kakao.com/"
 options = webdriver.ChromeOptions()
 options.add_argument('lang=ko_KR')
-chromedriver_path="./chromedriver.exe"
+chromedriver_path=""
+if platform.system()=="Windows":
+    chromedriver_path= "./chromedriver.exe"
+elif platform.system() == "Linux":
+    chromedriver_path = "./chromedriver"
 driver=webdriver.Chrome(os.path.join(os.getcwd(),chromedriver_path),options=options)
 
 driver.get(url)
