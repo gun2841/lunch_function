@@ -15,6 +15,7 @@ options.add_argument('--no-sandbox')
 chromedriver_path = "./chromedriver"
 driver = webdriver.Chrome(os.path.join(os.getcwd(), chromedriver_path), options=options)  # chromedriver 열기
 print(driver)
+print("test")
 driver.implicitly_wait(4)  # 렌더링 될때까지 기다린다 4초
 driver.get('https://pf.kakao.com/_xcwwCs')  # 주소 가져오기
 
