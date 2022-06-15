@@ -1,5 +1,6 @@
 import collections
 from kakao import overlapped_data,make_map,get_menu
+from func import insertLunch , insertFood
 from tqdm import tqdm
 import pandas as pd
 import numpy as np
@@ -32,12 +33,19 @@ for place in results:
     road_address.append(place['road_address_name'])
     place_url.append(place['place_url'])
     ID.append(place['id'])
-    category.append(place['category_name'])
+    category.append(place['category_name'].split()[-1])
     ar = np.array([ID, stores, X, Y, category,road_address, place_url]).T
     df = pd.DataFrame(ar, columns=['ID', 'stores', 'X', 'Y','category', 'road_address', 'place_url'])
 print('total_reuslt_number = ', len(df))
 print("메뉴가져오기 시작")
-menus = get_menu(ID)
+rating,menus = get_menu(ID,False)
+print(len(rating))
 print("메뉴가져오기 종료")
+df['rating']=rating
+df['menu']=menus
+
+### DB insert
+#insertLunch(df)
+#insertFood(df)
 #make_map(df,loc_y,loc_x)
 df.to_excel("./menu.xlsx")

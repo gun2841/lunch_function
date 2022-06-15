@@ -103,6 +103,7 @@ def _getMenuInfo(menu):
     return [menuName, menuPrice]
 def get_menu(ID,headless=True):
     data=[]
+    rating=[]
     headers = {
         "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/100.0.4896.151 Whale/3.14.134.62 Safari/537.36"}
     url = "https://place.map.kakao.com/"
@@ -118,14 +119,14 @@ def get_menu(ID,headless=True):
     driver = webdriver.Chrome(os.path.join(os.getcwd(), chromedriver_path), options=options)
     for id in tqdm(ID):
         try:
-            sleep(0.2)
+            sleep(1)
             driver.get(url + id)
-            sleep(0.6)
+            sleep(1)
             menuInfos = []
             html = driver.page_source
             soup = BeautifulSoup(html, 'html.parser')
-            sleep(1)
-
+            rate = soup.select_one(
+                '#mArticle > div.cont_essential > div:nth-child(1) > div.place_details > div > div > a:nth-child(3) > span.color_b').text
             menuonlyType = soup.select('.cont_menu > .list_menu > .menuonly_type')
             nophotoType = soup.select('.cont_menu > .list_menu > .nophoto_type')
             photoType = soup.select('.cont_menu > .list_menu > .photo_type')
@@ -138,9 +139,10 @@ def get_menu(ID,headless=True):
             else:
                 for menu in photoType:
                     menuInfos.append(_getMenuInfo(menu))
-            data.append([id,menuInfos])
+            data.append(menuInfos)
+            rating.append(rate[:-1])
         except:
             pass
     driver.close()
-    return data
+    return rating,data
 
