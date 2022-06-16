@@ -1,4 +1,5 @@
 import collections
+import concurrent.futures
 import requests
 import pandas as pd
 import numpy as np
@@ -15,6 +16,8 @@ import csv
 import urllib.request
 import urllib.parse
 import re
+from multiprocessing import Pool
+from concurrent.futures import ThreadPoolExecutor
 from bs4 import BeautifulSoup
 import platform
 from tqdm import tqdm
@@ -101,48 +104,51 @@ def _getMenuInfo(menu):
         menuPrice =  menuPrices[0].text.split(' ')[1]
 
     return [menuName, menuPrice]
-def get_menu(ID,headless=True):
-    data=[]
-    rating=[]
-    headers = {
-        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/100.0.4896.151 Whale/3.14.134.62 Safari/537.36"}
-    url = "https://place.map.kakao.com/"
+def get_menu(li):
     options = webdriver.ChromeOptions()
     options.add_argument('lang=ko_KR')
-    if headless:
-        options.add_argument('headless')
+    options.add_argument('headless')
+    options.add_argument('"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/100.0.4896.151 Whale/3.14.134.62 Safari/537.36"')
     chromedriver_path = ""
     if platform.system() == "Windows":
         chromedriver_path = "./chromedriver.exe"
     elif platform.system() == "Linux":
         chromedriver_path = "./chromedriver"
     driver = webdriver.Chrome(os.path.join(os.getcwd(), chromedriver_path), options=options)
-    for id in tqdm(ID):
-        try:
-            sleep(1)
-            driver.get(url + id)
-            sleep(1)
-            menuInfos = []
-            html = driver.page_source
-            soup = BeautifulSoup(html, 'html.parser')
-            rate = soup.select_one(
-                '#mArticle > div.cont_essential > div:nth-child(1) > div.place_details > div > div > a:nth-child(3) > span.color_b').text
-            menuonlyType = soup.select('.cont_menu > .list_menu > .menuonly_type')
-            nophotoType = soup.select('.cont_menu > .list_menu > .nophoto_type')
-            photoType = soup.select('.cont_menu > .list_menu > .photo_type')
-            if len(menuonlyType) != 0:
-                for menu in menuonlyType:
-                    menuInfos.append(_getMenuInfo(menu))
-            elif len(nophotoType) != 0:
-                for menu in nophotoType:
-                    menuInfos.append(_getMenuInfo(menu))
-            else:
-                for menu in photoType:
-                    menuInfos.append(_getMenuInfo(menu))
-            data.append(menuInfos)
-            rating.append(rate[:-1])
-        except:
-            pass
-    driver.close()
-    return rating,data
 
+    sleep(1)
+    driver.get(li[1])
+    sleep(1)
+    menuInfos = []
+    html = driver.page_source
+    soup = BeautifulSoup(html, 'html.parser')
+    rate=""
+    try:
+        rate = soup.select_one(  '#mArticle > div.cont_essential > div:nth-child(1) > div.place_details > div > div > a:nth-child(3) > span.color_b').text
+        menuonlyType = soup.select('.cont_menu > .list_menu > .menuonly_type')
+        nophotoType = soup.select('.cont_menu > .list_menu > .nophoto_type')
+        photoType = soup.select('.cont_menu > .list_menu > .photo_type')
+        if len(menuonlyType) != 0:
+            for menu in menuonlyType:
+                menuInfos.append(_getMenuInfo(menu))
+        elif len(nophotoType) != 0:
+            for menu in nophotoType:
+                menuInfos.append(_getMenuInfo(menu))
+        else:
+            for menu in photoType:
+                menuInfos.append(_getMenuInfo(menu))
+    except:
+        pass
+    print(li)
+    driver.close()
+    #print(rate[:-1],menuInfos)
+    return li[0],rate[:-1],menuInfos
+def get_content(ID, urls):
+    data = []
+    with concurrent.futures.ThreadPoolExecutor(max_workers=8) as executor:
+        results=[]
+        for i in trange(len(urls)):
+            results.append(executor.submit(get_menu,[ID[i],urls[i]]))
+        for f in concurrent.futures.as_completed(results):
+            data.append(f.result())
+    return data
