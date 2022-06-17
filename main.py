@@ -1,5 +1,5 @@
 import collections
-from kakao import overlapped_data,make_map,get_menu ,get_content
+from kakao import overlapped_data,make_map,get_menu ,get_content,get_menuInfo
 from func import insertLunch , insertFood
 from tqdm import tqdm
 import pandas as pd
@@ -48,9 +48,10 @@ print('total_reuslt_number = ', len(df))
 
 print("메뉴, 평점 가져오기 시작")
 start_time=time.time()
-menus=get_content(ID,place_url)
+#menus=get_content(ID,place_url)
+menus=get_menuInfo(ID)
 print(time.time()-start_time)
 len(menus)
 for i in menus:
     print(i)
-#df.to_excel("./menu.xlsx")
+df.to_excel("./menu.xlsx")
