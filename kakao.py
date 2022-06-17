@@ -10,6 +10,7 @@ import folium
 import openpyxl
 import os
 from selenium import webdriver
+from selenium.webdriver import DesiredCapabilities
 from selenium.webdriver.common.keys import Keys
 import requests
 import csv
@@ -24,6 +25,7 @@ from tqdm import tqdm
 from time import sleep
 from tqdm import trange
 from haversine import haversine
+cnt = 0
 def whole_region(keyword, start_x, start_y, end_x, end_y):
     # print(start_x,start_y,end_x,end_y)
     page_num = 1
@@ -105,6 +107,7 @@ def _getMenuInfo(menu):
 
     return [menuName, menuPrice]
 def get_menu(li):
+    global cnt
     options = webdriver.ChromeOptions()
     options.add_argument('lang=ko_KR')
     options.add_argument('headless')
@@ -119,6 +122,11 @@ def get_menu(li):
     sleep(1)
     driver.get(li[1])
     sleep(1)
+    try:
+        result = driver.switch_to.alert()
+        result.accept()
+    except:
+        pass
     menuInfos = []
     html = driver.page_source
     soup = BeautifulSoup(html, 'html.parser')
@@ -139,15 +147,18 @@ def get_menu(li):
                 menuInfos.append(_getMenuInfo(menu))
     except:
         pass
-    print(li)
+    #print(li)
+    cnt+=1
+    print(cnt)
+
     driver.close()
     #print(rate[:-1],menuInfos)
     return li[0],rate[:-1],menuInfos
 def get_content(ID, urls):
     data = []
-    with concurrent.futures.ThreadPoolExecutor(max_workers=8) as executor:
+    with concurrent.futures.ThreadPoolExecutor(max_workers=4) as executor:
         results=[]
-        for i in trange(len(urls)):
+        for i in range(len(urls)):
             results.append(executor.submit(get_menu,[ID[i],urls[i]]))
         for f in concurrent.futures.as_completed(results):
             data.append(f.result())
