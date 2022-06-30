@@ -1,7 +1,8 @@
-import pandas as pd
-filename ='./menu.xlsx'
+filename ="./test.txt"
 
-df = pd.read_excel(filename, sheet_name="Sheet1",engine='openpyxl')
+f = open(filename,'r',encoding='utf-8')
+lines = f.readlines()
 
-for i,row in df.iterrows():
-    print(row)
+
+for line in lines:
+    print(line.split(','))

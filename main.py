@@ -39,11 +39,6 @@ for place in results:
     df = pd.DataFrame(ar, columns=['ID', 'stores', 'X', 'Y','category', 'road_address', 'place_url'])
 print('total_reuslt_number = ', len(df))
 
-
-
-### DB insert
-#insertLunch(df)
-#insertFood(df)
 #make_map(df,loc_y,loc_x)
 
 print("메뉴, 평점 가져오기 시작")
@@ -52,6 +47,18 @@ start_time=time.time()
 menus=get_menuInfo(ID)
 print(time.time()-start_time)
 len(menus)
+menu =[]
+price=[]
+rating=[]
+
 for i in menus:
-    print(i)
+    rating.append(i[1])
+for i in menus:
+    for j in i[2]:
+        price.append([i[0],j[0],j[1]])
+df['rating'] = rating
 df.to_excel("./menu.xlsx")
+
+### DB insert
+insertLunch(df)
+insertFood(price)
