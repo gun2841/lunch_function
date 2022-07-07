@@ -60,5 +60,5 @@ df['rating'] = rating
 df.to_excel("./menu.xlsx")
 
 ### DB insert
-insertLunch(df)
+ insertLunch(df)
 insertFood(price)

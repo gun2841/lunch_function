@@ -5,7 +5,7 @@ import urllib.request
 import platform
 from selenium.webdriver.common.by import By
 options = webdriver.ChromeOptions()
-#options.add_argument('headless')
+options.add_argument('headless')
 options.add_argument('lang=ko_KR')
 options.add_argument('--no-sandbox')
 chromedriver_path =""
